@@ -1,6 +1,7 @@
 version: "2.1"
 orbs:
   slack: circleci/slack@4.1
+  docker: circleci/docker@2.2.0
 
 jobs:
   hello-world:
@@ -24,3 +25,8 @@ workflows:
   say-hello-workflow:
     jobs:
       - hello-world
+  lint-dockerfile:
+    jobs:
+      - docker/hadolint:
+          dockerfiles: ./Dockerfile
+          hadolint-tag: 2.2.0-debian
