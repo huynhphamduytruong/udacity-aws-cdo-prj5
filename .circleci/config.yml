@@ -38,3 +38,6 @@ workflows:
           hadolint-tag: 2.2.0-debian
           attach-workspace: true
       - build-image
+      - docker/publish:
+          image: $DOCKER_LOGIN/$DOCKER_IMG
+          update-description: true
