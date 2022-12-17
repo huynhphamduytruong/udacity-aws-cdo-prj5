@@ -25,7 +25,7 @@ jobs:
       - checkout
       - docker/check
       - docker/build:
-          image: $DOCKER_USERNAME/$DOCKER_IMG
+          image: $DOCKER_LOGIN/$DOCKER_IMG
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
