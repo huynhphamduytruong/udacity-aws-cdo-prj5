@@ -37,13 +37,11 @@ jobs:
       - kubernetes/install-kubectl:
           kubectl-version: "v1.21.13"
       - aws-eks/update-kubeconfig-with-authenticator:
+          kubectl-version: "v1.21.13"
           cluster-name: truonghpd-capstone
           aws-region: ${AWS_REGION}
-      - run:
-          command: echo "EKS_CLUSTER_NAME is ${EKS_CLUSTER_NAME} and AWS_REGION is ${AWS_REGION} and AWS_DEFAULT_REGION is ${AWS_DEFAULT_REGION}"
-          when: on_fail
       - kubernetes/create-or-update-resource:
-          get-rollout-status: true
+          # get-rollout-status: true
           resource-file-path: k8s.yml
           show-kubectl-command: true
       - run:
