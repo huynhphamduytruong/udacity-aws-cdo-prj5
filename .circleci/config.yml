@@ -44,7 +44,7 @@ jobs:
           when: on_fail
       - kubernetes/create-or-update-resource:
           get-rollout-status: true
-          resource-file-path: k8s.yaml
+          resource-file-path: k8s.yml
           show-kubectl-command: true
       - run:
           name: "Check the nodes"
