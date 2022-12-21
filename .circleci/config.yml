@@ -34,14 +34,14 @@ jobs:
       - image: "cimg/base:stable"
     steps:
       - checkout
-      - run:
-          name: "Prep the env"
-          command: |
-            echo 'export AWS_REGION="$AWS_REGION"' >> $BASH_ENV
       - kubernetes/install-kubectl:
           kubectl-version: "v1.21.13"
       - aws-eks/update-kubeconfig-with-authenticator:
           cluster-name: truonghpd-capstone
+          aws-region: ${AWS_REGION}
+      - run:
+          command: echo "EKS_CLUSTER_NAME is ${EKS_CLUSTER_NAME} and AWS_REGION is ${AWS_REGION} and AWS_DEFAULT_REGION is ${AWS_DEFAULT_REGION}"
+          when: on_fail
       - kubernetes/create-or-update-resource:
           get-rollout-status: true
           resource-file-path: ./k8s.yaml
