@@ -27,6 +27,33 @@ jobs:
       - docker/build:
           image: $DOCKER_LOGIN/$DOCKER_IMG
 
+  k8s-deployment:
+    docker:
+      - image: "cimg/base:stable"
+    steps:
+      - checkout
+      - kubernetes/install-kubectl
+      - kubernetes/create-or-update-resource:
+          get-rollout-status: true
+          resource-file-path: ./k8s.yaml
+          show-kubectl-command: true
+      - run:
+          name: "Check the nodes"
+          command: |
+            kubectl get nodes
+      - run:
+          name: "Check the deployments"
+          command: |
+            kubectl get deployments
+      - run:
+          name: "Check the pods"
+          command: |
+            kubectl get pods -o wide
+      - run:
+          name: "Check the service"
+          command: |
+            kubectl get service/truonghpd-capstone-service
+
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
@@ -44,3 +71,5 @@ workflows:
           image: $DOCKER_LOGIN/$DOCKER_IMG
           tag: "latest,$CIRCLE_SHA1"
           update-description: true
+      - k8s-deployment:
+          requires: [docker/publish]
