@@ -42,4 +42,5 @@ workflows:
       - docker/publish:
           requires: [build-image]
           image: $DOCKER_LOGIN/$DOCKER_IMG
+          tag: "latest,$CIRCLE_SHA1"
           update-description: true
