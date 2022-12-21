@@ -34,8 +34,8 @@ jobs:
       - image: "cimg/base:stable"
     steps:
       - checkout
-      - kubernetes/install-kubectl
-          kubectl-version: v1.21.13
+      - kubernetes/install-kubectl:
+          kubectl-version: "v1.21.13"
       - aws-eks/update-kubeconfig-with-authenticator:
           cluster-name: truonghpd-capstone
       - kubernetes/create-or-update-resource:
