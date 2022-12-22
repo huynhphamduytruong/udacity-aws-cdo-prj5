@@ -28,22 +28,6 @@ jobs:
           event: fail
           template: basic_fail_1
 
-  lint-dockerfile:
-    executor: docker-ex
-    steps:
-      - docker/hadolint:
-          dockerfiles: ./Dockerfile
-          # hadolint-tag: 2.2.0-debian
-          # attach-workspace: true
-      - slack/notify:
-          event: pass
-          template: basic_success_1
-          step_name: "lint-dockerfile"
-      - slack/notify:
-          event: fail
-          template: basic_fail_1
-          step_name: "lint-dockerfile"
-
   build-image:
     executor: docker/machine
     steps:
@@ -140,9 +124,12 @@ workflows:
   main-workflow:
     jobs:
       - say-hello
-      - lint-dockerfile
+      - docker/hadolint:
+          dockerfiles: Dockerfile
+          hadolint-tag: 2.2.0-debian
+          attach-workspace: true
       - build-image:
-          requires: [lint-dockerfile]
+          requires: [docker/hadolint]
       - docker/publish:
           requires: [build-image]
           image: $DOCKER_LOGIN/$DOCKER_IMG
