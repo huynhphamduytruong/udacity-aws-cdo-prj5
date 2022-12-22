@@ -57,8 +57,6 @@ jobs:
     executor: docker-ex
     steps:
       - checkout
-      - kubernetes/install-kubectl:
-          kubectl-version: "v1.21.13"
       - aws-eks/update-kubeconfig-with-authenticator:
           kubectl-version: "v1.21.13"
           cluster-name: ${EKS_CLUSTER_NAME}
@@ -110,25 +108,23 @@ jobs:
           template: basic_fail_1
           step_name: "check-health"
 
-  trigger-rolling:
+  get-rolling-status:
     executor: docker-ex
     steps:
-      - kubernetes/install-kubectl:
-          kubectl-version: "v1.21.13"
       - aws-eks/update-kubeconfig-with-authenticator:
           kubectl-version: "v1.21.13"
           cluster-name: ${EKS_CLUSTER_NAME}
           aws-region: ${AWS_REGION}
+      - kubernetes/get-rollout-status:
+          show-kubectl-command: true
+          resource-name: deployment/truonghpd-capstone-deployment
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
-  hello-workflow:
+  default:
     jobs:
       - say-hello
-
-  main-workflow:
-    jobs:
       - docker/hadolint:
           dockerfiles: Dockerfile
           hadolint-tag: 2.2.0-debian
@@ -144,4 +140,6 @@ workflows:
       - k8s-deployment:
           requires: [docker/publish, create-cluster]
       - check-health:
+          requires: [k8s-deployment]
+      - get-rolling-status:
           requires: [k8s-deployment]
