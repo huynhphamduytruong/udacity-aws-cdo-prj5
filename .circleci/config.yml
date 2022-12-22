@@ -20,7 +20,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: "Start pipeline #$CIRCLE_SHA1"
+          name: "Start pipeline #${CIRCLE_SHA1}"
           command: |
             echo 'Hello, World!'
       - slack/notify:
@@ -36,7 +36,7 @@ jobs:
       - checkout
       - docker/check
       - docker/build:
-          image: $DOCKER_LOGIN/$DOCKER_IMG
+          image: ${DOCKER_LOGIN}/${DOCKER_IMG}
 
   create-cluster:
     executor: docker-ex
@@ -177,8 +177,8 @@ workflows:
           requires: [docker/hadolint]
       - docker/publish:
           requires: [build-image]
-          image: $DOCKER_LOGIN/$DOCKER_IMG
-          tag: "latest,$CIRCLE_SHA1"
+          image: ${DOCKER_LOGIN}/${DOCKER_IMG}
+          tag: "latest,${CIRCLE_SHA1}"
           update-description: true
       - create-cluster
       - k8s-deployment:
