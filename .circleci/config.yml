@@ -78,5 +78,13 @@ workflows:
           image: $DOCKER_LOGIN/$DOCKER_IMG
           tag: "latest,$CIRCLE_SHA1"
           update-description: true
+      - aws-eks/create-cluster:
+          cluster-name: truonghpd-capstone
+          aws-region: ${AWS_REGION}
+          kubectl-version: "v1.21.13"
+          nodes: 3
+          nodes-max: 5
+          nodes-min: 1
+          show-eksctl-command: true
       - k8s-deployment:
-          requires: [docker/publish]
+          requires: [docker/publish, aws-eks/create-cluster]
