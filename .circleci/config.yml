@@ -6,7 +6,7 @@ orbs:
   kubernetes: circleci/kubernetes@1.3.1
 
 executors:
-  docker:
+  docker-ex:
     docker:
       - image: cimg/base:stable
   python:
@@ -15,7 +15,7 @@ executors:
 
 jobs:
   say-hello:
-    executor: docker
+    executor: docker-ex
     steps:
       - checkout
       - run:
@@ -29,7 +29,7 @@ jobs:
           template: basic_fail_1
 
   lint-dockerfile:
-    executor: docker
+    executor: docker-ex
     steps:
       - docker/hadolint:
           dockerfiles: ./Dockerfile
@@ -79,7 +79,7 @@ jobs:
           show-eksctl-command: true
 
   k8s-deployment:
-    executor: docker
+    executor: docker-ex
     steps:
       - checkout
       - kubernetes/install-kubectl:
@@ -118,7 +118,7 @@ jobs:
           step_name: "k8s-deployment"
 
   check-health:
-    executor: docker
+    executor: docker-ex
     steps:
       - run:
           name: "Curl to service to check for health"
