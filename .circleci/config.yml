@@ -20,8 +20,9 @@ jobs:
     steps:
       - checkout
       - run:
-          name: "Say hello"
-          command: "echo Hello, World!"
+          name: "Start pipeline #$CIRCLE_SHA1"
+          command: |
+            echo 'Hello, World!'
       - slack/notify:
           event: pass
           template: basic_success_1
