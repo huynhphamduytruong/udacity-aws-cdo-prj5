@@ -43,14 +43,10 @@ jobs:
           kubectl-version: "v1.21.13"
       - aws-eks/setup
       - aws-eks/install-aws-iam-authenticator
-      # - aws-eks/update-kubeconfig-with-authenticator:
-      #     kubectl-version: "v1.21.13"
-      #     cluster-name: ${EKS_CLUSTER_NAME}
-      #     aws-region: ${AWS_REGION}
       - run:
           name: Pre-check before creating
           command: |
-            kubectl cluster-info
+            aws eks describe-cluster --name ${EKS_CLUSTER_NAME}
       - run:
           name: Create cluster
           when: on_fail
