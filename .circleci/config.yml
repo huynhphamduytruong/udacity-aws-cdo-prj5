@@ -29,7 +29,7 @@ jobs:
           template: basic_fail_1
 
   lint-dockerfile:
-    executor: python
+    executor: docker
     steps:
       - docker/hadolint:
           dockerfiles: ./Dockerfile
