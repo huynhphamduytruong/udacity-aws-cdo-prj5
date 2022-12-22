@@ -52,6 +52,20 @@ jobs:
       - docker/build:
           image: $DOCKER_LOGIN/$DOCKER_IMG
 
+  check-service:
+    executor: python
+    steps:
+      - kubernetes/install-kubectl:
+          kubectl-version: "v1.21.13"
+      - aws-eks/update-kubeconfig-with-authenticator:
+          kubectl-version: "v1.21.13"
+          cluster-name: ${EKS_CLUSTER_NAME}
+          aws-region: ${AWS_REGION}
+      - run:
+          name: Test cluster
+          command: |
+            kubectl get services
+
   create-cluster:
     executor: python
     steps:
@@ -75,7 +89,7 @@ jobs:
           cluster-name: ${EKS_CLUSTER_NAME}
           aws-region: ${AWS_REGION}
       - kubernetes/create-or-update-resource:
-          # get-rollout-status: true
+          get-rollout-status: true
           resource-file-path: k8s.yml
           show-kubectl-command: true
       - run:
@@ -134,8 +148,17 @@ workflows:
           image: $DOCKER_LOGIN/$DOCKER_IMG
           tag: "latest,$CIRCLE_SHA1"
           update-description: true
-      - create-cluster
-      - k8s-deployment:
-          requires: [docker/publish, create-cluster]
+
+  k8s-cluster:
+    when:
+      and:
+        - equal: [docker/publish]
+        - or: [check-service, create-cluster]
+    jobs:
+      - check-service
+      - create-cluster:
+          type: approval
+          requires: [check-service]
+      - k8s-deployment
       - check-health:
           requires: [k8s-deployment]
