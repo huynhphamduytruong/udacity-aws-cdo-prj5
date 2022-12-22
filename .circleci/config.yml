@@ -26,11 +26,9 @@ jobs:
       - slack/notify:
           event: pass
           template: basic_success_1
-          step_name: "Running pipeline #${CIRCLE_SHA1}"
       - slack/notify:
           event: fail
           template: basic_fail_1
-          step_name: "Running pipeline #${CIRCLE_SHA1}"
 
   build-image:
     executor: docker/machine
