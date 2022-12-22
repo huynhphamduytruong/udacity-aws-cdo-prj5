@@ -188,6 +188,8 @@ workflows:
           requires: [k8s-deployment]
       - get-rolling-status:
           requires: [k8s-deployment]
-      - delete-cluster:
+      - hold:
           type: approval
           requires: [k8s-deployment]
+      - delete-cluster:
+          requires: [hold]
