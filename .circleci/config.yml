@@ -36,8 +36,8 @@ jobs:
       - docker/build:
           image: $DOCKER_LOGIN/$DOCKER_IMG
 
-  check-service:
-    executor: python
+  create-cluster:
+    executor: docker-ex
     steps:
       - kubernetes/install-kubectl:
           kubectl-version: "v1.21.13"
@@ -46,21 +46,14 @@ jobs:
           cluster-name: ${EKS_CLUSTER_NAME}
           aws-region: ${AWS_REGION}
       - run:
-          name: Test cluster
+          name: Pre-check before creating
           command: |
             kubectl get services
-
-  create-cluster:
-    executor: python
-    steps:
-      - aws-eks/create-cluster:
-          cluster-name: ${EKS_CLUSTER_NAME}
-          aws-region: ${AWS_REGION}
-          kubectl-version: "v1.21.13"
-          nodes: 3
-          nodes-max: 5
-          nodes-min: 1
-          show-eksctl-command: true
+      - run:
+          name: Create cluster
+          when: on_fail
+          command: |
+            eksctl create cluster --name ${EKS_CLUSTER_NAME} --nodes 3 --nodes-min 1 --nodes-max 5 --region ${AWS_REGION}
 
   k8s-deployment:
     executor: docker-ex
@@ -135,18 +128,8 @@ workflows:
           image: $DOCKER_LOGIN/$DOCKER_IMG
           tag: "latest,$CIRCLE_SHA1"
           update-description: true
-
-  k8s-validate:
-    jobs:
-      - check-service
       - create-cluster
-
-  k8s-workflow:
-    when:
-      and:
-        - equal: [docker/publish]
-        - or: [check-service, create-cluster]
-    jobs:
-      - k8s-deployment
+      - k8s-deployment:
+          requires: [docker/publish, create-cluster]
       - check-health:
           requires: [k8s-deployment]
