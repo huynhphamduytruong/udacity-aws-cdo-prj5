@@ -5,10 +5,17 @@ orbs:
   aws-eks: circleci/aws-eks@2.2.0
   kubernetes: circleci/kubernetes@1.3.1
 
-jobs:
-  say-hello:
+executors:
+  docker:
     docker:
       - image: cimg/base:stable
+  python:
+    docker:
+      - image: cimg/python:3.10-browsers
+
+jobs:
+  say-hello:
+    executor: docker
     steps:
       - checkout
       - run:
@@ -42,8 +49,7 @@ jobs:
           show-eksctl-command: true
 
   k8s-deployment:
-    docker:
-      - image: "cimg/base:stable"
+    executor: docker
     steps:
       - checkout
       - kubernetes/install-kubectl:
