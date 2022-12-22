@@ -43,16 +43,17 @@ jobs:
       - aws-cli/install
       - aws-cli/setup
       - aws-eks/setup
+      - kubernetes/install-kubectl:
+          kubectl-version: "v1.21.13"
       - run:
-          name: Pre-check before creating
+          name:
           command: |
+            echo 'Pre-check before creating...'
             aws eks describe-cluster --name ${EKS_CLUSTER_NAME}
-      - run:
-          name: Create cluster
-          when: on_fail
-          command: |
-            eksctl create cluster --name ${EKS_CLUSTER_NAME} --nodes 3 --nodes-min 1 --nodes-max 5 --region ${AWS_REGION}
-
+            if [ $? -ne 0 ]; then
+              echo 'Cluster not found. Creating new cluster...'
+              eksctl create cluster --name ${EKS_CLUSTER_NAME} --nodes 3 --nodes-min 1 --nodes-max 5 --region ${AWS_REGION}
+            fi
   k8s-deployment:
     executor: docker-ex
     steps:
