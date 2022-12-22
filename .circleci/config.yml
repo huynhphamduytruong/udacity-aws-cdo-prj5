@@ -23,10 +23,26 @@ jobs:
           command: "echo Hello, World!"
       - slack/notify:
           event: pass
-          template: success_tagged_deploy_1
+          template: basic_success_1
       - slack/notify:
           event: fail
           template: basic_fail_1
+
+  lint-dockerfile:
+    executor: python
+    steps:
+      - docker/hadolint:
+          dockerfiles: ./Dockerfile
+          hadolint-tag: 2.2.0-debian
+          attach-workspace: true
+      - slack/notify:
+          event: pass
+          template: basic_success_1
+          step_name: lint-dockerfile
+      - slack/notify:
+          event: fail
+          template: basic_fail_1
+          step_name: lint-dockerfile
 
   build-image:
     executor: docker/machine
@@ -40,7 +56,7 @@ jobs:
     executor: python
     steps:
       - aws-eks/create-cluster:
-          cluster-name: truonghpd-capstone
+          cluster-name: ${EKS_CLUSTER_NAME}
           aws-region: ${AWS_REGION}
           kubectl-version: "v1.21.13"
           nodes: 3
@@ -56,7 +72,7 @@ jobs:
           kubectl-version: "v1.21.13"
       - aws-eks/update-kubeconfig-with-authenticator:
           kubectl-version: "v1.21.13"
-          cluster-name: truonghpd-capstone
+          cluster-name: ${EKS_CLUSTER_NAME}
           aws-region: ${AWS_REGION}
       - kubernetes/create-or-update-resource:
           # get-rollout-status: true
@@ -78,6 +94,31 @@ jobs:
           name: "Check the service"
           command: |
             kubectl get service/truonghpd-capstone-service
+      - slack/notify:
+          event: pass
+          template: success_tagged_deploy_1
+          step_name: k8s-deployment
+      - slack/notify:
+          event: fail
+          template: basic_fail_1
+          step_name: k8s-deployment
+
+  check-health:
+    executor: docker
+    steps:
+      - run:
+          name: "Curl to service to check for health"
+          command: |
+            SVC_HOSTNAME=$(kubectl get service/truonghpd-capstone-service -o jsonpath="{.status.loadBalancer.ingress[0].hostname}")
+            curl $SVC_HOSTNAME
+      - slack/notify:
+          event: pass
+          template: basic_success_1
+          step_name: check-health
+      - slack/notify:
+          event: fail
+          template: basic_fail_1
+          step_name: check-health
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
@@ -85,12 +126,9 @@ workflows:
   main-workflow:
     jobs:
       - say-hello
-      - docker/hadolint:
-          dockerfiles: ./Dockerfile
-          hadolint-tag: 2.2.0-debian
-          attach-workspace: true
+      - lint-dockerfile
       - build-image:
-          requires: [docker/hadolint]
+          requires: [lint-dockerfile]
       - docker/publish:
           requires: [build-image]
           image: $DOCKER_LOGIN/$DOCKER_IMG
@@ -99,3 +137,5 @@ workflows:
       - create-cluster
       - k8s-deployment:
           requires: [docker/publish, create-cluster]
+      - check-health:
+          requires: [k8s-deployment]
