@@ -60,6 +60,8 @@ jobs:
     executor: docker-ex
     steps:
       - checkout
+      - kubernetes/install-kubectl:
+          kubectl-version: "v1.21.13"
       - aws-eks/update-kubeconfig-with-authenticator:
           kubectl-version: "v1.21.13"
           cluster-name: ${EKS_CLUSTER_NAME}
@@ -114,6 +116,8 @@ jobs:
   get-rolling-status:
     executor: docker-ex
     steps:
+      - kubernetes/install-kubectl:
+          kubectl-version: "v1.21.13"
       - aws-eks/update-kubeconfig-with-authenticator:
           kubectl-version: "v1.21.13"
           cluster-name: ${EKS_CLUSTER_NAME}
@@ -121,11 +125,21 @@ jobs:
       - kubernetes/get-rollout-status:
           show-kubectl-command: true
           resource-name: deployment/truonghpd-capstone-deployment
+      - slack/notify:
+          event: pass
+          template: basic_success_1
+          step_name: "get-rolling-status"
+      - slack/notify:
+          event: fail
+          template: basic_fail_1
+          step_name: "get-rolling-status"
 
   delete-cluster:
     executor: docker-ex
     steps:
       - checkout
+      - kubernetes/install-kubectl:
+          kubectl-version: "v1.21.13"
       - aws-eks/update-kubeconfig-with-authenticator:
           kubectl-version: "v1.21.13"
           cluster-name: ${EKS_CLUSTER_NAME}
@@ -134,6 +148,14 @@ jobs:
           cluster-name: ${EKS_CLUSTER_NAME}
           aws-region: ${AWS_REGION}
           show-eksctl-command: true
+      - slack/notify:
+          event: pass
+          template: basic_success_1
+          step_name: "delete-cluster"
+      - slack/notify:
+          event: fail
+          template: basic_fail_1
+          step_name: "delete-cluster"
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
