@@ -145,13 +145,11 @@ jobs:
     executor: docker-ex
     steps:
       - checkout
-      - kubernetes/install-kubectl:
-          kubectl-version: "v1.21.13"
       - aws-eks/update-kubeconfig-with-authenticator:
           kubectl-version: "v1.21.13"
           cluster-name: ${EKS_CLUSTER_NAME}
           aws-region: ${AWS_REGION}
-      - kubernetes/create-or-update-resource:
+      - aws-eks/delete-cluster:
           cluster-name: ${EKS_CLUSTER_NAME}
           aws-region: ${AWS_REGION}
           show-eksctl-command: true
