@@ -56,6 +56,7 @@ jobs:
             else
               echo 'Cluster existed. Skiping...'
             fi
+
   k8s-deployment:
     executor: docker-ex
     steps:
@@ -99,6 +100,12 @@ jobs:
   check-health:
     executor: docker-ex
     steps:
+      - kubernetes/install-kubectl:
+          kubectl-version: "v1.21.13"
+      - aws-eks/update-kubeconfig-with-authenticator:
+          kubectl-version: "v1.21.13"
+          cluster-name: ${EKS_CLUSTER_NAME}
+          aws-region: ${AWS_REGION}
       - run:
           name: "Curl to service to check for health"
           command: |
