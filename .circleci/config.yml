@@ -33,8 +33,8 @@ jobs:
     steps:
       - docker/hadolint:
           dockerfiles: ./Dockerfile
-          hadolint-tag: 2.2.0-debian
-          attach-workspace: true
+          # hadolint-tag: 2.2.0-debian
+          # attach-workspace: true
       - slack/notify:
           event: pass
           template: basic_success_1
