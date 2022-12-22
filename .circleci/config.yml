@@ -119,6 +119,19 @@ jobs:
           show-kubectl-command: true
           resource-name: deployment/truonghpd-capstone-deployment
 
+  delete-cluster:
+    executor: docker-ex
+    steps:
+      - checkout
+      - aws-eks/update-kubeconfig-with-authenticator:
+          kubectl-version: "v1.21.13"
+          cluster-name: ${EKS_CLUSTER_NAME}
+          aws-region: ${AWS_REGION}
+      - kubernetes/create-or-update-resource:
+          cluster-name: ${EKS_CLUSTER_NAME}
+          aws-region: ${AWS_REGION}
+          show-eksctl-command: true
+
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
@@ -142,4 +155,7 @@ workflows:
       - check-health:
           requires: [k8s-deployment]
       - get-rolling-status:
+          requires: [k8s-deployment]
+      - delete-cluster:
+          type: approval
           requires: [k8s-deployment]
