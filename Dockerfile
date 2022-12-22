@@ -1,4 +1,4 @@
-FROM nginx:latest
+FROM nginx:mainline
 
 RUN rm /etc/nginx/conf.d/*
 COPY ./app/nginx.conf /etc/nginx/conf.d/
