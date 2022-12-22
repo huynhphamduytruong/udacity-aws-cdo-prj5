@@ -136,15 +136,17 @@ workflows:
           tag: "latest,$CIRCLE_SHA1"
           update-description: true
 
+  k8s-validate:
+    jobs:
+      - check-service
+      - create-cluster
+
   k8s-workflow:
     when:
       and:
         - equal: [docker/publish]
         - or: [check-service, create-cluster]
     jobs:
-      - check-service
-      - create-cluster:
-          requires: [check-service]
       - k8s-deployment
       - check-health:
           requires: [k8s-deployment]
